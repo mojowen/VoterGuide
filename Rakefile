@@ -13,7 +13,7 @@ task :serve do
 end
 
 task :mayors do
-    mayors, _ = mayor_data
+    mayors = mayor_data
 
     markdown = [[]]
 
@@ -38,16 +38,27 @@ task :mayors do
     end
 end
 
-task :alderpeople do
-    alderpeople = []
-    CSV.foreach("data/alderpeople.csv",
+def csv_to_json filename
+    list = []
+    CSV.foreach("data/#{filename}.csv",
                 :headers => true) do |row|
-         alderpeople.push Hash[row.headers.map(&:downcase).zip(row.fields.map)]
+         list.push (Hash[row.headers.map(&:downcase).map(&:strip)
+                    .zip(row.fields.map)])
     end
-    File.open('data/alderpeople.json','w') do |fl|
-        fl.write(alderpeople.to_json)
+    File.open("data/#{filename}.json",'w') do |fl|
+        fl.write(list.to_json)
     end
     Rake::Task["all"]
+end
+task :mayors do
+    csv_to_json 'mayors'
+end
+task :other do
+    csv_to_json 'other'
+end
+task :counselors do
+    csv_to_json 'counselors'
+    csv_to_json 'districts'
 end
 
 task :erb, :paths do |t,args|
@@ -79,13 +90,13 @@ task :all do
 end
 
 task :sharing do
-    mayors, _ = mayor_data()
+    _, _, counselors = counselor_data()
 
     build = {
-        'mayor' => mayors,
-        'alderman' => JSON::parse(File.read('data/alderpeople.json'))
+        'mayor' => mayor_data,
+        'counselor' => counselors,
+        'other' => JSON::parse(File.read('data/other.json'))
     }
-
 
     FileUtils.rm_r 'sharing' if Dir.exists?("sharing")
     Dir.mkdir "sharing"
