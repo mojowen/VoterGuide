@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= @title %></title>
+<%= @meta_partial %>
+</head>
+<script type="text/javascript">
+    (function() {
+        var anchor = "<%= @anchor %>",
+            redirect = [
+                "http://www.chicagovoterguide.org",
+                document.location.search,
+                "#!",
+                anchor
+            ]
+        document.location = redirect.join('');
+    })();
+</script>
+<body>
+    Redirecting...
+</body>
+</html>
